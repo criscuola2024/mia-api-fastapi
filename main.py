@@ -10,7 +10,7 @@ app = FastAPI()
 DB_FILE = "db.json"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
-
+print(GITHUB_TOKEN)
 '''def load_db():
     if not os.path.exists(DB_FILE):
         with open(DB_FILE, "w") as f:
@@ -74,6 +74,7 @@ def delete_studente(id: int):
     data = [s for s in data if s["id"] != id]
     save_db(data)
     return {"deleted": id}'''
+
 
 
 
