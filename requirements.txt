@@ -1,6 +1,7 @@
 fastapi
-jsonify
+flask
 uvicorn
 python-dotenv
 requests
+
 
