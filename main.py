@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from flask import Flask, request, jsonify
 import json
 import os
 import requests
@@ -74,6 +74,7 @@ def delete_studente(id: int):
     data = [s for s in data if s["id"] != id]
     save_db(data)
     return {"deleted": id}'''
+
 
 
 
