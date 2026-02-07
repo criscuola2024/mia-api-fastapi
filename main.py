@@ -26,14 +26,14 @@ def get_studenti(id: int):
     studente=data[id]
     return studente
     
-'''@app.post("/studenti")
+@app.post("/studenti")
 def add_studente(studente: dict):
     data = load_db()
     studente["id"] = len(data) + 1
     data.append(studente)
     save_db(data)
     return studente
-
+'''
 @app.put("/studenti/{id}")
 def update_studente(id: int, studente: dict):
     data = load_db()
@@ -50,6 +50,7 @@ def delete_studente(id: int):
     data = [s for s in data if s["id"] != id]
     save_db(data)
     return {"deleted": id}'''
+
 
 
 
