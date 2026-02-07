@@ -20,7 +20,13 @@ def save_db(data):
 def get_studenti():
     return load_db()
 
-@app.post("/studenti")
+@app.get("/studenti/{id}")
+def get_studenti():
+    data=load_db()
+    studente=data["id"]
+    return studente
+    
+'''@app.post("/studenti")
 def add_studente(studente: dict):
     data = load_db()
     studente["id"] = len(data) + 1
@@ -43,4 +49,5 @@ def delete_studente(id: int):
     data = load_db()
     data = [s for s in data if s["id"] != id]
     save_db(data)
-    return {"deleted": id}
+    return {"deleted": id}'''
+
