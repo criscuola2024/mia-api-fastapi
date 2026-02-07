@@ -21,7 +21,7 @@ def get_studenti():
     return load_db()
 
 @app.get("/studenti/{id}")
-def get_studenti():
+def get_studenti(id: int):
     data=load_db()
     studente=data["id"]
     return studente
@@ -50,4 +50,5 @@ def delete_studente(id: int):
     data = [s for s in data if s["id"] != id]
     save_db(data)
     return {"deleted": id}'''
+
 
