@@ -23,7 +23,7 @@ def get_studenti():
 @app.get("/studenti/{id}")
 def get_studenti(id: int):
     data=load_db()
-    studente=data["id"]
+    studente=data[id]
     return studente
     
 '''@app.post("/studenti")
@@ -50,5 +50,6 @@ def delete_studente(id: int):
     data = [s for s in data if s["id"] != id]
     save_db(data)
     return {"deleted": id}'''
+
 
 
