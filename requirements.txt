@@ -1,7 +1,8 @@
 fastapi
-flask
-uvicorn
-python-dotenv
+uvicorn[standard]
+gspread
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
 requests
-
-
+python-dotenv
