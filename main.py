@@ -1,85 +1,114 @@
-from flask import Flask, request, jsonify
-import json
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 import os
-import requests
-import base64
-
-
+import json
+import gspread
+from google.oauth2.service_account import Credentials
 
 app = FastAPI()
-DB_FILE = "db.json"
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
-print(GITHUB_TOKEN)
-'''def load_db():
-    if not os.path.exists(DB_FILE):
-        with open(DB_FILE, "w") as f:
-            json.dump([], f)
-    with open(DB_FILE, "r") as f:
-        return json.load(f)'''
+# ==========================
+# GOOGLE SHEETS SETUP
+# ==========================
+
+# Carica la service account key dalla variabile d’ambiente
+service_account_info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+
+creds = Credentials.from_service_account_info(
+    service_account_info,
+    scopes=["https://www.googleapis.com/auth/spreadsheets"]
+)
+
+client = gspread.authorize(creds)
+
+# Nome del foglio Google
+SHEET_NAME = "studenti_api"
+sheet = client.open(SHEET_NAME).sheet1
+
+
+# ==========================
+# FUNZIONI DI SUPPORTO
+# ==========================
 
 def load_db():
-    url = "https://api.github.com/repos/criscuola2024/mia-api-fastapi/contents/db.json"
-    headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
-
-    r = requests.get(url, headers=headers)
-    content = r.json()
-
-    file_content = base64.b64decode(content["content"]).decode("utf-8")
-    data = json.loads(file_content)
-
-    return data, content["sha"]
+    """Legge tutte le righe del foglio e le restituisce come lista di dict."""
+    return sheet.get_all_records()
 
 
-def save_db(data):
-    with open(DB_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+def save_row(row):
+    """Aggiunge una nuova riga al foglio."""
+    sheet.append_row(row)
+
+
+def update_row(row_index, row_values):
+    """Aggiorna una riga esistente (senza toccare l'header)."""
+    # row_index parte da 2 perché la riga 1 è l’header
+    sheet.update(f"A{row_index}:Z{row_index}", [row_values])
+
+
+def delete_row(row_index):
+    """Cancella una riga dal foglio."""
+    sheet.delete_rows(row_index)
+
+
+# ==========================
+# ENDPOINTS API
+# ==========================
 
 @app.get("/studenti")
 def get_studenti():
-    return load_db()
+    data = load_db()
+    return JSONResponse(content=data)
+
 
 @app.get("/studenti/{id}")
-def get_studenti(id: int):
-    data=load_db()
-    studente=data[id]
-    return studente
-    
-@app.route("/studenti", methods=["POST"])
-def add_studente():
-    data, sha = load_db()
-    nuovo = request.get_json()
+def get_studente(id: int):
+    data = load_db()
+    for studente in data:
+        if studente["id"] == id:
+            return JSONResponse(content=studente)
+    return JSONResponse(content={"error": "Studente non trovato"}, status_code=404)
 
-    nuovo["id"] = len(data) + 1
-    data.append(nuovo)
 
-    save_db(data, sha)
+@app.post("/studenti")
+def add_studente(studente: dict):
+    data = load_db()
 
-    return jsonify(nuovo), 201
+    nuovo_id = len(data) + 1
+    studente["id"] = nuovo_id
 
-'''
+    # Ordine delle colonne come nel foglio
+    row = [studente.get("id"), studente.get("nome"), studente.get("cognome"), studente.get("classe")]
+
+    save_row(row)
+
+    return JSONResponse(content=studente, status_code=201)
+
+
 @app.put("/studenti/{id}")
 def update_studente(id: int, studente: dict):
     data = load_db()
-    for s in data:
+
+    for index, s in enumerate(data, start=2):  # start=2 perché riga 1 è header
         if s["id"] == id:
+            # aggiorna i valori
             s.update(studente)
-            save_db(data)
-            return s
-    return {"error": "not found"}
+
+            row_values = [s.get("id"), s.get("nome"), s.get("cognome"), s.get("classe")]
+            update_row(index, row_values)
+
+            return JSONResponse(content=s)
+
+    return JSONResponse(content={"error": "Studente non trovato"}, status_code=404)
+
 
 @app.delete("/studenti/{id}")
 def delete_studente(id: int):
     data = load_db()
-    data = [s for s in data if s["id"] != id]
-    save_db(data)
-    return {"deleted": id}'''
 
+    for index, s in enumerate(data, start=2):
+        if s["id"] == id:
+            delete_row(index)
+            return {"deleted": id}
 
-
-
-
-
-
-
-
+    return JSONResponse(content={"error": "Studente non trovato"}, status_code=404)
