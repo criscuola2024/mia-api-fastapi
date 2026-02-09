@@ -26,7 +26,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 
 # Nome del foglio Google
-SHEET_NAME = "studenti_api"
+SHEET_NAME = "Api4dti"
 sheet = client.open(SHEET_NAME).sheet1
 
 
@@ -116,5 +116,6 @@ def delete_studente(id: int):
             return {"deleted": id}
 
     return JSONResponse(content={"error": "Studente non trovato"}, status_code=404)
+
 
 
