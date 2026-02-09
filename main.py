@@ -16,7 +16,11 @@ service_account_info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
 
 creds = Credentials.from_service_account_info(
     service_account_info,
-    scopes=["https://www.googleapis.com/auth/spreadsheets"]
+   scopes=[
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
 )
 
 client = gspread.authorize(creds)
@@ -112,3 +116,4 @@ def delete_studente(id: int):
             return {"deleted": id}
 
     return JSONResponse(content={"error": "Studente non trovato"}, status_code=404)
+
