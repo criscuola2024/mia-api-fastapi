@@ -65,7 +65,7 @@ def get_studenti():
     return JSONResponse(content=data)
 
 
-@app.get("/studenti/{id}")
+@app.get("/studenti")
 def get_studente(id: int):
     data = load_db()
     for studente in data:
@@ -116,6 +116,7 @@ def delete_studente(id: int):
             return {"deleted": id}
 
     return JSONResponse(content={"error": "Studente non trovato"}, status_code=404)
+
 
 
 
