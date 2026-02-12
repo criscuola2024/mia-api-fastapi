@@ -59,7 +59,7 @@ def delete_row(row_index):
 # ENDPOINTS API
 # ==========================
 
-@app.get("/studenti")
+@app.get("/studenti/all")
 def get_studenti():
     data = load_db()
     return JSONResponse(content=data)
@@ -116,6 +116,7 @@ def delete_studente(id: int):
             return {"deleted": id}
 
     return JSONResponse(content={"error": "Studente non trovato"}, status_code=404)
+
 
 
 
